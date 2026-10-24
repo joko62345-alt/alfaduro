@@ -1,12 +1,31 @@
-@extends('products.layout')
+<?php
+$pdo = new PDO(
+    'mysql:host=localhost;dbname=tokoku;charset=utf8mb4',
+    'user', 'password',
+    [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ]
+);
 
-@section('title', 'Edit Produk')
+$keyword  = 'Laptop';      // dari input pengguna
+$kategori = 'Elektronik';  // dari pilihan kategori
+$page     = 1;
+$perPage  = 5;
+$offset   = ($page - 1) * $perPage;
 
-@section('content')
-    <section class="mx-auto max-w-3xl rounded-xl bg-white p-6 shadow-sm sm:p-8">
-        <h1 class="text-2xl font-semibold text-gray-900">Edit Produk</h1>
-        <p class="mt-2 text-sm text-gray-600">Unggah gambar baru hanya jika ingin mengganti gambar yang sekarang.</p>
+$sql = "SELECT id, nama_produk, kategori, harga, stok
+        FROM produk
+        WHERE nama_produk LIKE :keyword
+          AND kategori = :kategori
+        ORDER BY harga DESC, id ASC
+        LIMIT :limit OFFSET :offset";
 
-        @include('products._form')
-    </section>
-@endsection
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':keyword',  '%' . $keyword . '%', PDO::PARAM_STR);
+$stmt->bindValue(':kategori', $kategori,            PDO::PARAM_STR);
+$stmt->bindValue(':limit',    $perPage,             PDO::PARAM_INT);
+$stmt->bindValue(':offset',   $offset,              PDO::PARAM_INT);
+$stmt->execute();
+
+$hasil = $stmt->fetchAll(PDO::FETCH_ASSOC);

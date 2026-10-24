@@ -1,11 +1,18 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\KasirController;
-use App\Http\Controllers\ProductInvoiceController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductInvoiceController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/upload', [ImageController::class, 'index'])
+    ->name('image.index');
+
+Route::post('/upload', [ImageController::class, 'upload'])
+    ->name('image.upload');
 
 Route::get('/products/{product}/invoice', [ProductInvoiceController::class, 'show'])
     ->name('products.invoice');
@@ -30,7 +37,7 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     // Khusus Admin
     Route::middleware('role:admin')->group(function () {
